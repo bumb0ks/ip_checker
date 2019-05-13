@@ -14,9 +14,14 @@ void run(char** ips)
 
     IPList list(first_ip, last_ip);
 
+    boost::asio::io_context io_context;
+    pinger p(io_context);
+
     for (const auto& ip : list)
     {
-        std::cout << ip << std::endl;
+        p.check(ip);
+
+        io_context.run();
     }
 }
 
@@ -30,11 +35,7 @@ int main(int argc, char** argv)
     
     std::chrono::time_point now = std::chrono::steady_clock::now();
     
-    // run(argv);
-
-    boost::asio::io_context io_context;
-    pinger p(io_context, "127.0.0.1");
-    io_context.run();
+    run(argv);
 
     auto t = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - now).count();
     cout << "Time spent: " << t / 1000 << "." << t % 1000 << "ms";
