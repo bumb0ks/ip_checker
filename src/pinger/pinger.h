@@ -48,6 +48,7 @@ private:
   boost::asio::streambuf reply_buffer_;
   std::size_t num_replies_;
   std::string destination_ip;
+  bool timed_out;
 };
 
 #endif

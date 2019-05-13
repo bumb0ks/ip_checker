@@ -11,10 +11,11 @@ pinger::pinger(boost::asio::io_context& io_context)
 
 void pinger::check(const std::string& destination)
 {
-    std::cout << "Check " << destination << std::endl;
     destination_ip = destination;
     
     destination_ = *resolver_.resolve(icmp::v4(), destination_ip, "").begin();
+
+    timed_out = false;
 
     start_send();
     start_receive();
@@ -43,17 +44,27 @@ void pinger::start_send()
 
     // Wait up to five seconds for a reply.
     num_replies_ = 0;
-    timer_.expires_at(time_sent_ + chrono::seconds(5));
+    timer_.expires_at(time_sent_ + chrono::milliseconds(500));
     timer_.async_wait(boost::bind(&pinger::handle_timeout, this));
 }
 
 void pinger::handle_timeout()
 {
-    if (num_replies_ == 0)
-        std::cout << "[" << destination_ip << "] Request timed out" << std::endl;
-    else
-        std::cout << "[" << destination_ip << "] Nice!" << std::endl;
+    timed_out = true;
+    if (num_replies_ != 0)
+    {
+        std::cout << "[" << destination_ip << "] is up" << std::endl;
+        return;
+    }
 
+    boost::system::error_code error;
+
+    socket_.cancel();
+
+    // if (num_replies_ != 0)
+    //     std::cout << "[" << destination_ip << "] Request timed out" << std::endl;
+    // else
+        // std::cout << "[" << destination_ip << "] is up" << std::endl;
     // // Requests must be sent no less than one second apart.
     // timer_.expires_at(time_sent_ + chrono::seconds(1));
     // timer_.async_wait(boost::bind(&pinger::start_send, this));
@@ -61,6 +72,7 @@ void pinger::handle_timeout()
 
 void pinger::start_receive()
 {
+    if (timed_out) return;
     // Discard any data already in the buffer.
     reply_buffer_.consume(reply_buffer_.size());
 
@@ -89,10 +101,11 @@ void pinger::handle_receive(std::size_t length)
             && icmp_hdr.sequence_number() == sequence_number_)
     {
         // If this is the first reply, interrupt the five second timeout.
-        if (num_replies_++ == 0)
-            timer_.cancel();
+        // if (num_replies_++ == 0)
+        num_replies_++;
+        timer_.cancel();
 
-        // Print out some information about the reply packet.
+        // // Print out some information about the reply packet.
         // chrono::steady_clock::time_point now = chrono::steady_clock::now();
         // chrono::steady_clock::duration elapsed = now - time_sent_;
         // std::cout << length - ipv4_hdr.header_length()

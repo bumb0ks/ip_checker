@@ -20,7 +20,7 @@ void run(char** ips)
     for (const auto& ip : list)
     {
         p.check(ip);
-
+        io_context.reset();
         io_context.run();
     }
 }
