@@ -4,7 +4,7 @@
 #include <boost/algorithm/string.hpp>
 
 #include <string>
-#include <vector>
+#include <array>
 #include <iostream>
 
 
@@ -14,10 +14,12 @@ class IPList
 {
     struct ip_address
     {
-        typedef vector<uint8_t> octet_range;
+        typedef array<uint8_t, 4> octet_range;
     public:
         ip_address(const string& _ip) : ip(_ip)
-        {}
+        {
+            decomposed_ip = move(decompose());
+        }
 
         string operator*() 
         { 
@@ -26,24 +28,22 @@ class IPList
 
         void operator++() 
         { 
-            octet_range range(move(decompose()));
+            ++decomposed_ip[3];
 
-            ++range[3];
-
-            if (range[3] == 0)
+            if (decomposed_ip[3] == 0)
             {
-                ++range[2];
-                if (range[2] == 0)
+                ++decomposed_ip[2];
+                if (decomposed_ip[2] == 0)
                 {
-                    ++range[1];
-                    if (range[1] == 0)
+                    ++decomposed_ip[1];
+                    if (decomposed_ip[1] == 0)
                     {
-                        ++range[0];
+                        ++decomposed_ip[0];
                     }
                 }
             }
 
-            compose(move(range));
+            compose();
         }
 
         bool operator!=(ip_address rhs) 
@@ -60,23 +60,24 @@ class IPList
         octet_range decompose() const
         {
             octet_range octets;
-            octets.reserve(4);
 
             vector<string> results;
             boost::split(results, ip, [](char c){return c == '.';});
             
+            size_t i = 0;
             for (string s : results)
             {
-                octets.push_back(static_cast<uint8_t>(stoi(s)));
+                octets[i] = static_cast<uint8_t>(stoi(s));
+                ++i;
             }
 
             return octets;
         }
 
-        void compose(octet_range&& octets)
+        void compose()
         {
             string result;
-            for(uint8_t o : octets)
+            for(uint8_t o : decomposed_ip)
             {
                 result += std::to_string(o) + ".";
             }
@@ -86,6 +87,7 @@ class IPList
 
     private:
         string ip;
+        octet_range decomposed_ip;
     };
 
 public:
