@@ -13,7 +13,6 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 set(CMAKE_CXX_STANDARD 17)
 
-set(BOOST_ROOT "C:/Users/bumbo/Documents/boost_1_69_0/")
 set(Boost_USE_STATIC_LIBS        ON)   # only find static libs
 set(Boost_USE_DEBUG_LIBS         ON)   # ignore debug libs and
 set(Boost_USE_RELEASE_LIBS       OFF)  # only find release libs
