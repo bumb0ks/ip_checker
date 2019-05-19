@@ -37,13 +37,14 @@ private:
 
   void handle_receive(std::size_t length);
 
-  static unsigned short get_identifier()
+  unsigned short get_identifier()
   {
-    #if defined(BOOST_ASIO_WINDOWS)
-      return static_cast<unsigned short>(::GetCurrentProcessId());
-    #else
-      return static_cast<unsigned short>(::getpid());
-    #endif
+    return m_id;
+  }
+
+  void generate_new_id()
+  {
+    m_id = rand() % 65500;
   }
 
   icmp::resolver resolver_;
@@ -59,6 +60,8 @@ private:
 
   bool timed_out;
   bool m_busy;
+
+  unsigned short m_id = 0;
 };
 
 #endif

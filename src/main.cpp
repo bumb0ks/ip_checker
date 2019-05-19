@@ -22,7 +22,7 @@ void run(char** ips)
 
     boost::shared_ptr<data_generator<IPList>> g(new data_generator<IPList>(list));
 
-    threaded_io_service_manager<pinger, data_generator<IPList> > manager(3, 1);
+    threaded_io_service_manager<pinger, data_generator<IPList> > manager(3, 6);
     manager.set_data_generator(g);
     manager.run();
 }

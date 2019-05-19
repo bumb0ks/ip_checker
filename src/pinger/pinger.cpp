@@ -29,6 +29,8 @@ pinger::~pinger()
 
 void pinger::process(const std::string& destination)
 {
+    generate_new_id();
+
     m_busy = true;
     destination_ip = destination;
     
@@ -101,10 +103,14 @@ void pinger::handle_receive(std::size_t length)
     is >> ipv4_hdr >> icmp_hdr;
 
     if (is && icmp_hdr.type() == icmp_header::echo_reply
-            // && icmp_hdr.identifier() == get_identifier()
+            && icmp_hdr.identifier() == get_identifier()
             && icmp_hdr.sequence_number() == sequence_number_)
     {
         num_replies_++;
+        timer_.cancel();
     }
-    timer_.cancel();
+    else
+    {
+        start_receive();
+    }
 }
