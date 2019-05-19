@@ -2,10 +2,16 @@
 #include "pinger/pinger.h"
 #include "ip_list/ip_list.h"
 
+#include <boost/thread.hpp>
+
+
 #include <iostream>
 #include <chrono>
 #include <utility>
 #include <string>
+
+#include "experimental/data_generator.h"
+#include "experimental/threaded_ioc_manager.h"
 
 void run(char** ips)
 {
@@ -14,15 +20,11 @@ void run(char** ips)
 
     IPList list(first_ip, last_ip);
 
-    boost::asio::io_context io_context;
-    pinger p(io_context);
+    boost::shared_ptr<data_generator<IPList>> g(new data_generator<IPList>(list));
 
-    for (const auto& ip : list)
-    {
-        p.check(ip);
-        io_context.reset();
-        io_context.run();
-    }
+    threaded_io_service_manager<pinger, data_generator<IPList> > manager(3, 1);
+    manager.set_data_generator(g);
+    manager.run();
 }
 
 int main(int argc, char** argv)
