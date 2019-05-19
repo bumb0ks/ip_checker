@@ -3,6 +3,7 @@
 
 #include <boost/asio.hpp>
 #include <boost/bind.hpp>
+#include <boost/function.hpp>
 #include <istream>
 #include <iostream>
 #include <ostream>
@@ -17,9 +18,15 @@ using boost::asio::steady_timer;
 class pinger
 {
 public:
-  pinger(boost::asio::io_context& io_context);
+  pinger(boost::asio::io_context& io_context,
+    boost::function<void (std::string)> callback);
+  pinger(pinger&& p);
 
-  void check(const std::string& destination);
+  ~pinger();
+
+  void process(const std::string& destination);
+
+  bool is_busy() const;
 
 private:
   void start_send();
@@ -48,7 +55,10 @@ private:
   boost::asio::streambuf reply_buffer_;
   std::size_t num_replies_;
   std::string destination_ip;
+  boost::function<void (std::string)> m_callback;
+
   bool timed_out;
+  bool m_busy;
 };
 
 #endif
