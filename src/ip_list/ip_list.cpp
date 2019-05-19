@@ -13,12 +13,12 @@ IPList::IPList(const string& _first_ip,
 }
 
 
-IPList::ip_address IPList::begin() const
+ip_address IPList::begin() const
 {
     return ip_address(first_ip);
 }
 
-IPList::ip_address IPList::end() const
+ip_address IPList::end() const
 {
     return m_end;
 }
