@@ -15,6 +15,10 @@
 using boost::asio::ip::icmp;
 using boost::asio::steady_timer;
 
+/*
+    Class contains all async functionality required to ping ip address.
+*/
+
 class pinger
 {
 public:

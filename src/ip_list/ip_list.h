@@ -10,6 +10,10 @@
 
 using namespace std;
 
+/*
+    Structure for saving and iterating via ip range.
+*/
+
 struct ip_address
 {
     typedef array<uint8_t, 4> octet_range;
@@ -102,6 +106,10 @@ private:
     string ip;
     octet_range decomposed_ip;
 };
+
+/*
+    IPs container
+*/
 
 class IPList
 {

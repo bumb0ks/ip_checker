@@ -1,6 +1,11 @@
 #ifndef DATA_GENERATOR
 #define DATA_GENERATOR
 
+/*
+    It is example of object needed in threaded ioc manager
+    as data provider.
+*/
+
 template <typename Container>
 class data_generator
 {
@@ -8,12 +13,6 @@ class data_generator
 
 public:
     typedef typename Container::value_type value_type;
-
-    data_generator(data_generator&& gen)
-    {
-        begin = std::move(gen.begin);
-        end = std::move(gen.end);
-    }
 
     data_generator(Container c) :
         begin(c.begin()),
