@@ -2,17 +2,38 @@
 #define THREADED_IOC_MANAGER
 
 #include <vector>
+#include <fstream>
+
+
 #include <boost/bind.hpp>
 #include <boost/thread.hpp>
 #include <boost/thread/mutex.hpp>
 #include <boost/shared_ptr.hpp>
+
+/*
+    Experimantal class for making some work with multi threaded 
+    io_context.
+    Actually it just starts workers (which must contain function process)
+    which should accept io_context for making async operations. Here
+    io_context starts in a few threads.
+
+    data_generator_t is redundant in current context. Its made 
+    for extensibility.
+
+    Features:
+
+    -   Functions for writing results must be also provided from class
+        user. 
+    -   Some service event manager object is needed for interflow
+        interaction between workers and this instance.
+
+*/
 
 template< typename worker_t, typename data_generator_t >
 class threaded_io_service_manager
 {
 public:
 
-    template<typename... RetType>
     threaded_io_service_manager(
         size_t thread_count,
         size_t worker_count
@@ -69,7 +90,9 @@ private:
         {
             std::stringstream a;
             a << ans << std::endl;
-            std::cout << a.str();
+            boost::lock_guard grd(m_write_mutex);
+            std::ofstream out_file("result", std::ios_base::app);
+            out_file << a.str();
         }
         push_data_and_process();
     }
@@ -91,6 +114,7 @@ private:
     size_t m_worker_count;
 
     boost::mutex m_reuse_mutex;
+    boost::mutex m_write_mutex;
 };
 
 #endif
